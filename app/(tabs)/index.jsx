@@ -18,12 +18,14 @@ export default function HomeScreen() {
         />
       }
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+      <ThemedView className="flex flex-1 items-center justify-center">
+        <ThemedText type="title" className="text-black">
+          Welcome!
+        </ThemedText>
         <HelloWave />
         <FontAwesomeIcon icon={faMugSaucer} />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
+      <ThemedView className="gap-2 mb-4">
         <ThemedText type="subtitle">Step 1: Try it</ThemedText>
         <ThemedText>
           Edit{" "}
@@ -39,14 +41,14 @@ export default function HomeScreen() {
           to open developer tools.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
+      <ThemedView className="gap-2 mb-4">
         <ThemedText type="subtitle">Step 2: Explore</ThemedText>
         <ThemedText>
           Tap the Explore tab to learn more about what's included in this
           starter app.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
+      <ThemedView className="gap-2 mb-4">
         <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
         <ThemedText>
           When you're ready, run{" "}
