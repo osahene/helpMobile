@@ -6,7 +6,6 @@ import {
   View,
   Text,
   Pressable,
-  FlatList,
   useWindowDimensions,
 } from "react-native";
 import {
@@ -22,9 +21,10 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-
+import Pagination from "@/components/Pagination";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
+import CustomButton from "@/components/CustomButton";
 
 type OnboardStep = {
   id: number;
@@ -32,6 +32,9 @@ type OnboardStep = {
   title: string;
   title2?: string;
   description: string;
+};
+type viewablProp = {
+  viewableItems: any[];
 };
 
 const onboardSteps: OnboardStep[] = [
@@ -63,6 +66,11 @@ export default function OnboardPage() {
   const [screenIndex, setScreenIndex] = useState(0);
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const x = useSharedValue(0);
+  const flatListRef = useAnimatedRef();
+  const flatListIndex = useSharedValue(0);
+  const onVIewableItemChanged: React.FC<viewablProp> = ({ viewableItems }) => {
+    return (flatListIndex.value = viewableItems[0].index);
+  };
   const onScroll = useAnimatedScrollHandler({
     onScroll: (event) => {
       x.value = event.contentOffset.x;
@@ -83,11 +91,16 @@ export default function OnboardPage() {
     setScreenIndex(0);
     router.back();
   };
+
   type RenderedItemsProps = {
     item: OnboardStep;
     index: number;
   };
-
+  type PageProp = {
+    data: any[];
+    x: number;
+    screenWidth: number;
+  };
   const RenderedItems: React.FC<RenderedItemsProps> = ({ item, index }) => {
     const imageAnimatedStyle = useAnimatedStyle(() => {
       const opacityAnimation = interpolate(
@@ -117,18 +130,44 @@ export default function OnboardPage() {
         transform: [{ translateY: translateYAnimation }],
       };
     });
+    const textAnimatedStyle = useAnimatedStyle(() => {
+      const opacityAnimation = interpolate(
+        x.value,
+        [
+          (index - 1) * SCREEN_WIDTH,
+          index * SCREEN_WIDTH,
+          (index + 1) * SCREEN_WIDTH,
+        ],
+        [0, 1, 0],
+        Extrapolation.CLAMP
+      );
+      const translateYAnimation = interpolate(
+        x.value,
+        [
+          (index - 1) * SCREEN_WIDTH,
+          index * SCREEN_WIDTH,
+          (index + 1) * SCREEN_WIDTH,
+        ],
+        [100, 0, 100],
+        Extrapolation.CLAMP
+      );
+      return {
+        opacity: opacityAnimation,
+        transform: [{ translateY: translateYAnimation }],
+      };
+    });
     return (
       <View style={{ width: SCREEN_WIDTH }}>
         <Animated.View style={[styles.logo, imageAnimatedStyle]}>
           <FontAwesomeIcon color="#FDFDFD" size={100} icon={item.icons} />
         </Animated.View>
-        <View style={styles.footer}>
+        <Animated.View style={[styles.footer, textAnimatedStyle]}>
           <Text style={styles.titles}>{item.title}</Text>
           <Text style={styles.titles}>{item.title2}</Text>
           <ThemedText style={styles.description}>
             {item.description}{" "}
           </ThemedText>
-        </View>
+        </Animated.View>
       </View>
     );
   };
@@ -147,12 +186,16 @@ export default function OnboardPage() {
         bounces={false}
         pagingEnabled={true}
         showsHorizontalScrollIndicator={false}
+        onViewableItemsChanged={onVIewableItemChanged}
       />
-      <View style={styles.buttonRow}>
+      <View style={styles.buttomContainer}>
         <Text style={styles.buttonText}>Skip</Text>
-        <Pressable style={styles.button} onPress={onContinue}>
-          <Text style={styles.buttonText}>Continue</Text>
-        </Pressable>
+        <Pagination data={onboardSteps} x={x} screenWidth={SCREEN_WIDTH} />
+        <CustomButton
+          flatListRef={flatListRef}
+          flatListIndex={flatListIndex}
+          dataLength={onboardSteps.length}
+        />
       </View>
     </SafeAreaView>
   );
@@ -160,7 +203,7 @@ export default function OnboardPage() {
 
 const styles = StyleSheet.create({
   page: {
-    alignItems: "center",
+    // alignItems: "center",
     justifyContent: "center",
     flex: 1,
   },
@@ -213,5 +256,12 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsBold",
     fontSize: 30,
     color: "white",
+  },
+  buttomContainer: {
+    // backgroundColor: "red",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 20,
   },
 });
