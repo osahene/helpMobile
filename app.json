@@ -15,7 +15,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.teenbyte.helpmobile",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
