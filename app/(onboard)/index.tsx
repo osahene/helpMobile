@@ -1,3 +1,4 @@
+import React, { useRef, useEffect } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { Stack, router } from "expo-router";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -23,12 +24,11 @@ import Animated, {
 } from "react-native-reanimated";
 import Pagination from "@/components/Pagination";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
 import CustomButton from "@/components/CustomButton";
 
 type OnboardStep = {
   id: number;
-  icons: typeof faTruckFast; // Type for FontAwesomeIcon
+  icons: typeof faTruckFast;
   title: string;
   title2?: string;
   description: string;
@@ -63,10 +63,9 @@ const onboardSteps: OnboardStep[] = [
 ];
 
 export default function OnboardPage() {
-  const [screenIndex, setScreenIndex] = useState(0);
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const x = useSharedValue(0);
-  const flatListRef = useAnimatedRef();
+  const flatListRef = useRef<Animated.FlatList<any>>(null);
   const flatListIndex = useSharedValue(0);
   const onVIewableItemChanged: React.FC<viewablProp> = ({ viewableItems }) => {
     return (flatListIndex.value = viewableItems[0].index);
@@ -76,21 +75,6 @@ export default function OnboardPage() {
       x.value = event.contentOffset.x;
     },
   });
-  const data = onboardSteps[screenIndex];
-
-  const onContinue = () => {
-    const lastScreen = screenIndex === onboardSteps.length - 1;
-    if (lastScreen) {
-      endOnboarding();
-    } else {
-      setScreenIndex(screenIndex + 1);
-    }
-  };
-
-  const endOnboarding = () => {
-    setScreenIndex(0);
-    router.back();
-  };
 
   type RenderedItemsProps = {
     item: OnboardStep;
@@ -156,14 +140,17 @@ export default function OnboardPage() {
         transform: [{ translateY: translateYAnimation }],
       };
     });
+
     return (
       <View style={{ width: SCREEN_WIDTH }}>
         <Animated.View style={[styles.logo, imageAnimatedStyle]}>
           <FontAwesomeIcon color="#FDFDFD" size={100} icon={item.icons} />
         </Animated.View>
         <Animated.View style={[styles.footer, textAnimatedStyle]}>
-          <Text style={styles.titles}>{item.title}</Text>
-          <Text style={styles.titles}>{item.title2}</Text>
+          <View>
+            <Text style={styles.titles}>{item.title}</Text>
+            {item.title2 && <Text style={styles.titles2}>{item.title2}</Text>}
+          </View>
           <ThemedText style={styles.description}>
             {item.description}{" "}
           </ThemedText>
@@ -176,6 +163,7 @@ export default function OnboardPage() {
       <Stack.Screen options={{ headerShown: false }} />
       <Animated.FlatList
         onScroll={onScroll}
+        ref={flatListRef}
         data={onboardSteps}
         renderItem={({ item, index }) => (
           <RenderedItems item={item} index={index} />
@@ -212,31 +200,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titles: {
-    fontSize: 50,
-    fontFamily: "PoppinsBlack",
-    letterSpacing: 1.3,
+    fontSize: 40,
+    fontFamily: "PoppinsExtraLight",
+    letterSpacing: 5,
     marginVertical: 20,
     textShadowColor: "white",
+    justifyContent: "center",
     color: "#fdfdfd",
   },
+  titles2: {
+    fontSize: 40,
+    fontFamily: "PoppinsBlack",
+    letterSpacing: 5,
+    marginBottom: 10,
+    textShadowColor: "white",
+    justifyContent: "center",
+    color: "#fdfdfd",
+  },
+
   description: {
     fontFamily: "PoppinsLight",
     fontSize: 30,
     lineHeight: 40,
+    paddingHorizontal: 7,
+    textAlign: "center",
   },
   logo: {
-    display: "flex",
-    color: "red",
     flexDirection: "row",
     margin: 20,
     alignSelf: "center",
-  },
-  logoControl: {
-    position: "relative",
-    right: -10,
+    alignItems: "flex-end",
+    justifyContent: "center",
   },
   footer: {
-    marginTop: "auto",
+    alignContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonRow: {
     marginTop: 20,

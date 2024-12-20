@@ -66,6 +66,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 
   const handlePress = () => {
     if (flatListIndex.value < dataLength - 1) {
+      flatListIndex.value + 1;
       flatListRef.current?.scrollToIndex({ index: flatListIndex.value + 1 });
     } else {
       navigation.navigate("Home" as never); // Adjust type for your navigation
